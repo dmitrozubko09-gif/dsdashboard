@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAVEN — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020408;--bg2:#060c14;--panel:#080f1a;
+  --border:#0d2035;--border2:#1a3a5c;
+  --c1:#00d4ff;--c2:#7000ff;--c3:#ff003c;
+  --green:#00ff9d;--yellow:#ffcc00;--orange:#ff8800;
+  --text:#c8dff0;--muted:#2a4a6a;
+  --glow1:rgba(0,212,255,0.3);--glow2:rgba(112,0,255,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.015) 3px,rgba(0,0,0,0.015) 4px);z-index:1000;}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+.sb-logo{padding:20px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:16px;letter-spacing:3px;color:var(--c1);text-shadow:0 0 12px var(--glow1);text-decoration:none;display:flex;align-items:center;gap:10px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--c1);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.guild-card{margin:12px;padding:12px;background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--c1);}
+.gc-row{display:flex;align-items:center;gap:10px;}
+.gc-icon{width:38px;height:38px;flex-shrink:0;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;overflow:hidden;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);}
+.gc-icon img{width:100%;height:100%;object-fit:cover;}
+.gc-name{font-size:13px;font-weight:700;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gc-stat{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+.gc-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(0,255,157,0.5);margin-left:auto;flex-shrink:0;animation:blink 2s infinite;}
+
+.nav-group{padding:8px 10px 0;}
+.nav-group-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:3px;padding:0 8px;margin-bottom:3px;}
+.nav-link{display:flex;align-items:center;gap:9px;padding:8px 8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;margin-bottom:1px;letter-spacing:0.5px;}
+.nav-link:hover{color:var(--text);background:rgba(0,212,255,0.03);border-left-color:var(--border2);}
+.nav-link.active{color:var(--c1);background:rgba(0,212,255,0.06);border-left-color:var(--c1);}
+.nav-icon{font-size:14px;width:18px;text-align:center;}
+.nav-cnt{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;background:var(--c3);color:#fff;padding:2px 6px;}
+.nav-cnt.green{background:rgba(0,255,157,0.2);color:var(--green);}
+
+.sb-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border);}
+.user-mini{display:flex;align-items:center;gap:9px;}
+.user-mini img{width:30px;height:30px;clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px);border:1px solid var(--border2);}
+.umi-name{font-size:12px;font-weight:700;letter-spacing:0.5px;}
+.umi-tag{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);}
+.umi-out{margin-left:auto;color:var(--muted);text-decoration:none;font-size:16px;transition:color 0.2s;}
+.umi-out:hover{color:var(--c3);}
+
+/* ── MAIN ── */
+.main{margin-left:230px;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(2,4,8,0.9);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-title{font-family:'Share Tech Mono',monospace;font-size:16px;letter-spacing:2px;color:var(--c1);}
+.tb-sub{font-size:12px;color:var(--muted);letter-spacing:1px;}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:7px 14px;background:transparent;cursor:pointer;transition:all 0.2s;}
+.tb-btn.primary{border:1px solid var(--c1);color:var(--c1);}
+.tb-btn.primary:hover{background:rgba(0,212,255,0.1);box-shadow:0 0 12px var(--glow1);}
+.tb-btn.ghost{border:1px solid var(--border);color:var(--muted);text-decoration:none;}
+.tb-btn.ghost:hover{border-color:var(--border2);color:var(--text);}
+
+.content{padding:24px 28px;}
+
+/* ── SECTIONS ── */
+.sec{display:none;}
+.sec.active{display:block;animation:secIn 0.25s both;}
+@keyframes secIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:20px;}
+.stat{background:var(--bg2);padding:20px;position:relative;overflow:hidden;transition:background 0.2s;}
+.stat:hover{background:var(--panel);}
+.stat::after{content:'';position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,var(--c1),var(--c2));opacity:0;transition:opacity 0.2s;}
+.stat:hover::after{opacity:1;}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:10px;}
+.stat-val{font-family:'Share Tech Mono',monospace;font-size:30px;color:var(--c1);text-shadow:0 0 16px var(--glow1);letter-spacing:-1px;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;}
+.stat-ico{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.3;}
+
+/* ── MINI STATS (overview row) ── */
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:16px;}
+.mini-stat{background:var(--bg2);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.ms-icon{font-size:20px;opacity:0.7;}
+.ms-val{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--text);}
+.ms-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+
+/* ── PANELS ── */
+.panel{background:var(--bg2);border:1px solid var(--border);margin-bottom:16px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--c1);}
+.panel-sub{font-size:9px;color:var(--muted);}
+.panel-body{padding:18px;}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-align:left;padding:9px 14px;background:var(--panel);border-bottom:1px solid var(--border);}
+td{padding:10px 14px;font-size:13px;font-weight:500;border-bottom:1px solid rgba(13,32,53,0.7);transition:background 0.1s;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,212,255,0.02);}
+
+/* ── MEMBER ROW ── */
+.member-cell{display:flex;align-items:center;gap:10px;}
+.m-ava{width:28px;height:28px;flex-shrink:0;clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px);background:var(--panel);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.m-ava img{width:100%;height:100%;object-fit:cover;}
+.m-name{font-weight:700;font-size:13px;letter-spacing:0.5px;}
+.m-nick{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
+
+/* ── ROLE PILL ── */
+.rpill{display:inline-block;padding:2px 7px;font-size:9px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;border:1px solid;margin:1px;}
+
+/* ── ACTION BUTTONS ── */
+.act-btn{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;background:transparent;border:1px solid;transition:all 0.2s;margin-right:4px;}
+.act-btn.kick{border-color:rgba(255,136,0,0.4);color:var(--orange);}
+.act-btn.kick:hover{background:rgba(255,136,0,0.1);}
+.act-btn.ban{border-color:rgba(255,0,60,0.4);color:var(--c3);}
+.act-btn.ban:hover{background:rgba(255,0,60,0.1);}
+.act-btn.unban{border-color:rgba(0,255,157,0.4);color:var(--green);}
+.act-btn.unban:hover{background:rgba(0,255,157,0.1);}
+.act-btn.nick{border-color:rgba(0,212,255,0.4);color:var(--c1);}
+.act-btn.nick:hover{background:rgba(0,212,255,0.1);}
+.act-btn.del{border-color:rgba(255,0,60,0.3);color:var(--c3);}
+.act-btn.del:hover{background:rgba(255,0,60,0.1);}
+.act-btn.role{border-color:rgba(112,0,255,0.4);color:#a060ff;}
+.act-btn.role:hover{background:rgba(112,0,255,0.1);}
+
+/* ── SEARCH BAR ── */
+.search-wrap{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;}
+.search-input{flex:1;background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--c1);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text);outline:none;letter-spacing:1px;}
+.search-input:focus{box-shadow:0 0 8px var(--glow1);}
+.search-input::placeholder{color:var(--muted);}
+.search-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;padding:8px 14px;background:transparent;border:1px solid var(--border2);color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.search-btn:hover,.search-btn.active{border-color:var(--c1);color:var(--c1);}
+
+/* ── CHANNEL LIST ── */
+.ch-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.ch-item:last-child{border-bottom:none;}
+.ch-item:hover{background:rgba(0,212,255,0.03);}
+.ch-hash{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--muted);}
+.ch-name{font-weight:700;font-size:13px;letter-spacing:0.5px;}
+.ch-topic{font-size:11px;color:var(--muted);margin-left:auto;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ── COPY ID ── */
+.copy-id{
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);
+  cursor:pointer;padding:2px 6px;border:1px solid transparent;
+  transition:all 0.2s;display:inline-flex;align-items:center;gap:4px;
+}
+.copy-id:hover{color:var(--c1);border-color:var(--border2);}
+.copy-id.copied{color:var(--green);border-color:rgba(0,255,157,0.3);}
+
+/* ── ROLE TAGS ── */
+.roles-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+.role-tag{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid;font-size:12px;font-weight:600;letter-spacing:0.5px;transition:all 0.2s;}
+.role-dot{width:8px;height:8px;flex-shrink:0;}
+.role-tag:hover{transform:translateY(-1px);}
+.role-del-btn{margin-left:6px;background:transparent;border:none;color:inherit;cursor:pointer;opacity:0.4;font-size:11px;transition:opacity 0.2s;}
+.role-del-btn:hover{opacity:1;}
+
+/* ── FORMS ── */
+.form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.form-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.form-input,.form-select,.form-textarea{background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--c1);padding:9px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;transition:all 0.2s;letter-spacing:0.5px;width:100%;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--c1);box-shadow:0 0 10px var(--glow1);}
+.form-textarea{min-height:90px;resize:vertical;font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:0;}
+.form-select option{background:var(--panel);}
+.form-btn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:10px 20px;cursor:pointer;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(112,0,255,0.1));border:1px solid var(--c1);color:var(--c1);transition:all 0.2s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+.form-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.25),rgba(112,0,255,0.2));box-shadow:0 0 16px var(--glow1);}
+.form-btn.danger{border-color:var(--c3);color:var(--c3);background:rgba(255,0,60,0.05);}
+.form-btn.danger:hover{background:rgba(255,0,60,0.15);}
+
+/* ── AUDIT LOG ── */
+.audit-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background 0.1s;}
+.audit-item:hover{background:rgba(0,212,255,0.02);}
+.audit-icon{font-size:16px;margin-top:1px;flex-shrink:0;}
+.audit-action{font-size:13px;font-weight:700;letter-spacing:0.5px;}
+.audit-user{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--c1);}
+.audit-reason{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── AUDIT FILTERS ── */
+.audit-filters{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--border);}
+.af-btn{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 10px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.af-btn:hover,.af-btn.active{border-color:var(--c1);color:var(--c1);background:rgba(0,212,255,0.05);}
+
+/* ── BAN ITEM ── */
+.ban-item{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.ban-ava{width:30px;height:30px;flex-shrink:0;clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px);overflow:hidden;background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.ban-ava img{width:100%;height:100%;object-fit:cover;}
+.ban-user{font-weight:700;font-size:13px;}
+.ban-reason{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--border);}
+.pag-info{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);}
+.pag-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.pag-btn:not(:disabled):hover{border-color:var(--c1);color:var(--c1);}
+.pag-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(2,4,8,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--c1);padding:28px;min-width:400px;max-width:90vw;max-height:85vh;overflow-y:auto;position:relative;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);}
+.modal-title{font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:2px;color:var(--c1);margin-bottom:20px;}
+.modal-close{position:absolute;top:14px;right:14px;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;transition:color 0.2s;}
+.modal-close:hover{color:var(--c3);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:600;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:12px 20px;border:1px solid;animation:toastIn 0.3s both;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+.toast.ok{border-color:var(--green);color:var(--green);background:rgba(0,255,157,0.08);}
+.toast.err{border-color:var(--c3);color:var(--c3);background:rgba(255,0,60,0.08);}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:2px;}
+.loading::before{content:'[ ';}
+.loading::after{content:' ]';}
+
+/* ── INFO ROWS ── */
+.info-row{display:flex;padding:10px 0;border-bottom:1px solid rgba(13,32,53,0.7);font-size:13px;}
+.info-key{color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;min-width:160px;}
+.info-val{font-weight:600;}
+
+/* ── ROLE PICKER ── */
+.role-picker{display:flex;flex-wrap:wrap;gap:6px;max-height:260px;overflow-y:auto;padding:4px;}
+.rp-item{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid;cursor:pointer;transition:all 0.15s;font-size:12px;font-weight:600;}
+.rp-item:hover{transform:translateY(-1px);}
+.rp-item.has-role{opacity:0.5;}
+.rp-item.has-role::after{content:' ✓';font-size:10px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="/servers" class="sb-logo">
+    <div class="sb-dot sb-logo-dot"></div>
+    ⚡ RAVEN
+  </a>
+
+  <div class="guild-card">
+    <div class="gc-row">
+      <div class="gc-icon" id="sbIcon">…</div>
+      <div style="min-width:0">
+        <div class="gc-name" id="sbName">Завантаження...</div>
+        <div class="gc-stat" id="sbStat">— учасників</div>
+      </div>
+      <div class="gc-dot"></div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">ОГЛЯД</div>
+    <a class="nav-link active" onclick="nav('overview',this)"><span class="nav-icon">📊</span>Огляд</a>
+    <a class="nav-link" onclick="nav('info',this)"><span class="nav-icon">ℹ️</span>Інформація</a>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">УПРАВЛІННЯ</div>
+    <a class="nav-link" onclick="nav('channels',this)"><span class="nav-icon">💬</span>Канали</a>
+    <a class="nav-link" onclick="nav('roles',this)"><span class="nav-icon">🎭</span>Ролі</a>
+    <a class="nav-link" onclick="nav('members',this)"><span class="nav-icon">👥</span>Учасники <span class="nav-cnt green" id="sbMemCnt" style="display:none"></span></a>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">МОДЕРАЦІЯ</div>
+    <a class="nav-link" onclick="nav('bans',this)"><span class="nav-icon">🔨</span>Бани <span class="nav-cnt" id="sbBanCnt" style="display:none"></span></a>
+    <a class="nav-link" onclick="nav('audit',this)"><span class="nav-icon">📋</span>Аудит лог</a>
+  </div>
+  <div class="nav-group" style="margin-top:8px">
+    <div class="nav-group-label">ІНСТРУМЕНТИ</div>
+    <a class="nav-link" onclick="nav('message',this)"><span class="nav-icon">📨</span>Повідомлення</a>
+    <a class="nav-link" onclick="nav('purge',this)"><span class="nav-icon">🗑️</span>Очистити чат</a>
+    <a class="nav-link" onclick="nav('settings',this)"><span class="nav-icon">⚙️</span>Налаштування</a>
+  </div>
+
+  <div class="sb-footer">
+    <div class="user-mini">
+      <img src="{{ user.avatar_url }}" alt="">
+      <div>
+        <div class="umi-name">{{ user.username }}</div>
+        <div class="umi-tag">DISCORD OAUTH2</div>
+      </div>
+      <a href="/logout" class="umi-out" title="Вийти">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="tb-left">
+      <div>
+        <div class="tb-title" id="tbTitle">// OVERVIEW</div>
+        <div class="tb-sub" id="tbSub">Загальна статистика сервера</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <a href="/servers" class="tb-btn ghost">← СЕРВЕРИ</a>
+      <button class="tb-btn primary" onclick="refreshAll()">↻ ОНОВИТИ</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div class="sec active" id="sec-overview">
+      <div class="stats">
+        <div class="stat"><div class="stat-lbl">УЧАСНИКИ</div><div class="stat-ico">👥</div><div class="stat-val" id="s-mem">—</div><div class="stat-sub" id="s-online">— онлайн</div></div>
+        <div class="stat"><div class="stat-lbl">КАНАЛИ</div><div class="stat-ico">💬</div><div class="stat-val" id="s-ch">—</div><div class="stat-sub">всього каналів</div></div>
+        <div class="stat"><div class="stat-lbl">РОЛІ</div><div class="stat-ico">🎭</div><div class="stat-val" id="s-roles">—</div><div class="stat-sub">ролей</div></div>
+        <div class="stat"><div class="stat-lbl">BOOST</div><div class="stat-ico">🚀</div><div class="stat-val" id="s-boost">—</div><div class="stat-sub" id="s-bcnt">бустів</div></div>
+      </div>
+
+      <div class="mini-stats" id="miniStats" style="display:none">
+        <div class="mini-stat"><div class="ms-icon">💬</div><div><div class="ms-val" id="ms-text">—</div><div class="ms-lbl">ТЕКСТ КАНАЛИ</div></div></div>
+        <div class="mini-stat"><div class="ms-icon">🔊</div><div><div class="ms-val" id="ms-voice">—</div><div class="ms-lbl">ГОЛОС КАНАЛИ</div></div></div>
+        <div class="mini-stat"><div class="ms-icon">🔨</div><div><div class="ms-val" id="ms-bans">—</div><div class="ms-lbl">АКТИВНИХ БАНІВ</div></div></div>
+      </div>
+
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head">// ШВИДКІ ДІЇ <span class="panel-sub">DIRECT ACTIONS</span></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:8px;">
+            <button class="form-btn" onclick="nav('message', document.querySelector('[onclick*=message]'))">📨 Надіслати повідомлення</button>
+            <button class="form-btn" onclick="nav('purge', document.querySelector('[onclick*=purge]'))">🗑️ Очистити чат</button>
+            <button class="form-btn" onclick="nav('audit', document.querySelector('[onclick*=audit]'))">📋 Переглянути аудит лог</button>
+            <button class="form-btn" onclick="nav('members', document.querySelector('[onclick*=members]'))">👥 Список учасників</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">// АУДИТ (ОСТАННІ) <span class="panel-sub">RECENT</span></div>
+          <div id="overviewAudit"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INFO ═══ -->
+    <div class="sec" id="sec-info">
+      <div class="panel">
+        <div class="panel-head">// ІНФОРМАЦІЯ ПРО СЕРВЕР</div>
+        <div class="panel-body" id="infoPanel"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ CHANNELS ═══ -->
+    <div class="sec" id="sec-channels">
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head">// КАНАЛИ <span class="panel-sub" id="chCount">0</span></div>
+          <div id="chList"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">// СТВОРИТИ КАНАЛ</div>
+          <div class="panel-body">
+            <div class="form-row"><div class="form-label">НАЗВА КАНАЛУ</div><input class="form-input" id="newChName" placeholder="назва-каналу"></div>
+            <div class="form-row"><div class="form-label">ТЕМА (необов'язково)</div><input class="form-input" id="newChTopic" placeholder="Тема каналу..."></div>
+            <div class="form-row"><div class="form-label">ТИП</div>
+              <select class="form-select" id="newChType">
+                <option value="0">💬 Текстовий</option>
+                <option value="5">📢 Announcement</option>
+              </select>
+            </div>
+            <button class="form-btn" onclick="createChannel()">+ СТВОРИТИ КАНАЛ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ROLES ═══ -->
+    <div class="sec" id="sec-roles">
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head">// РОЛІ <span class="panel-sub" id="roleCount">0</span></div>
+          <div class="panel-body"><div class="roles-wrap" id="rolesList"><div class="loading">ЗАВАНТАЖЕННЯ</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">// СТВОРИТИ РОЛЬ</div>
+          <div class="panel-body">
+            <div class="form-row"><div class="form-label">НАЗВА РОЛІ</div><input class="form-input" id="newRoleName" placeholder="Нова роль"></div>
+            <div class="form-row"><div class="form-label">КОЛІР (HEX)</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="form-input" id="newRoleColor" placeholder="5865f2" maxlength="6" style="flex:1">
+                <input type="color" id="colorPicker" value="#5865f2" style="width:38px;height:38px;border:1px solid var(--border);background:transparent;cursor:pointer;padding:2px;" oninput="syncColor(this)">
+              </div>
+            </div>
+            <div class="form-row" style="flex-direction:row;align-items:center;gap:12px">
+              <div class="form-label" style="margin:0">МОЖНА ЗГАДАТИ</div>
+              <input type="checkbox" id="newRoleMention" style="width:16px;height:16px;accent-color:var(--c1)">
+            </div>
+            <button class="form-btn" onclick="createRole()" style="margin-top:8px">+ СТВОРИТИ РОЛЬ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MEMBERS ═══ -->
+    <div class="sec" id="sec-members">
+      <div class="panel">
+        <div class="panel-head">
+          // УЧАСНИКИ
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="panel-sub" id="memCount">0</span>
+            <button class="search-btn" id="showBotsBtn" onclick="toggleBots()" title="Показати/сховати ботів">🤖</button>
+          </div>
+        </div>
+        <!-- SEARCH BAR -->
+        <div class="search-wrap">
+          <input class="search-input" id="memSearch" placeholder="// ПОШУК ЗА ІМЕНЕМ..." oninput="debounceSearch()">
+          <button class="search-btn" onclick="clearSearch()">✕ СКИНУТИ</button>
+        </div>
+        <table>
+          <thead><tr><th>УЧАСНИК</th><th>РОЛІ</th><th>ПРИЄДНАВСЯ</th><th>ДІЇ</th></tr></thead>
+          <tbody id="memTable"><tr><td colspan="4" class="loading">ЗАВАНТАЖЕННЯ</td></tr></tbody>
+        </table>
+        <!-- PAGINATION -->
+        <div class="pagination" id="memPagination" style="display:none">
+          <span class="pag-info" id="pagInfo">Показано — учасників</span>
+          <div style="display:flex;gap:8px">
+            <button class="pag-btn" id="prevBtn" onclick="pagPrev()" disabled>← НАЗАД</button>
+            <button class="pag-btn" id="nextBtn" onclick="pagNext()" disabled>ДАЛІ →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ BANS ═══ -->
+    <div class="sec" id="sec-bans">
+      <div class="panel">
+        <div class="panel-head">// БАНИ <span class="panel-sub" id="banCount">0</span></div>
+        <!-- BAN SEARCH -->
+        <div class="search-wrap">
+          <input class="search-input" id="banSearch" placeholder="// ПОШУК ЗА ІМЕНЕМ..." oninput="filterBans()">
+        </div>
+        <div id="banList"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ AUDIT ═══ -->
+    <div class="sec" id="sec-audit">
+      <div class="panel">
+        <div class="panel-head">// АУДИТ ЛОГ <span class="panel-sub">ЖУРНАЛ ДІЙ</span></div>
+        <!-- FILTERS -->
+        <div class="audit-filters">
+          <button class="af-btn active" onclick="setAuditFilter(null,this)">ВСІ</button>
+          <button class="af-btn" onclick="setAuditFilter(20,this)">👢 KІКИ</button>
+          <button class="af-btn" onclick="setAuditFilter(22,this)">🔨 БАНИ</button>
+          <button class="af-btn" onclick="setAuditFilter(23,this)">🔓 РОЗБАНИ</button>
+          <button class="af-btn" onclick="setAuditFilter(2,this)">➕ КАНАЛИ</button>
+          <button class="af-btn" onclick="setAuditFilter(26,this)">🎭 РОЛІ</button>
+          <button class="af-btn" onclick="setAuditFilter(1,this)">⚙️ СЕРВЕР</button>
+        </div>
+        <div id="auditList"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ MESSAGE ═══ -->
+    <div class="sec" id="sec-message">
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head">// ТЕКСТОВЕ ПОВІДОМЛЕННЯ</div>
+          <div class="panel-body">
+            <div class="form-row"><div class="form-label">КАНАЛ</div><select class="form-select" id="msgCh"></select></div>
+            <div class="form-row"><div class="form-label">ТЕКСТ</div><textarea class="form-textarea" id="msgText" placeholder="Введи текст..."></textarea></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <button class="form-btn" onclick="sendMsg(false)">📨 НАДІСЛАТИ</button>
+              <span id="msgLen" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)">0/2000</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">// EMBED ПОВІДОМЛЕННЯ</div>
+          <div class="panel-body">
+            <div class="form-row"><div class="form-label">КАНАЛ</div><select class="form-select" id="embedCh"></select></div>
+            <div class="form-row"><div class="form-label">ЗАГОЛОВОК</div><input class="form-input" id="embedTitle" placeholder="Заголовок embed..."></div>
+            <div class="form-row"><div class="form-label">ОПИС</div><textarea class="form-textarea" id="embedDesc" placeholder="Текст embed..."></textarea></div>
+            <div class="form-row"><div class="form-label">ФУТЕР (необов'язково)</div><input class="form-input" id="embedFooter" placeholder="Текст під embed..."></div>
+            <div class="form-row"><div class="form-label">КОЛІР</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="form-input" id="embedColor" placeholder="00d4ff" maxlength="6" style="flex:1">
+                <input type="color" id="embedColorPicker" value="#00d4ff" style="width:38px;height:38px;border:1px solid var(--border);background:transparent;cursor:pointer;padding:2px;" oninput="syncEmbedColor(this)">
+              </div>
+            </div>
+            <button class="form-btn" onclick="sendMsg(true)">📨 НАДІСЛАТИ EMBED</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PURGE ═══ -->
+    <div class="sec" id="sec-purge">
+      <div class="panel" style="max-width:480px">
+        <div class="panel-head">// ОЧИСТИТИ ЧАТ</div>
+        <div class="panel-body">
+          <div class="form-row"><div class="form-label">КАНАЛ</div><select class="form-select" id="purgeCh"></select></div>
+          <div class="form-row"><div class="form-label">КІЛЬКІСТЬ (макс 100)</div><input class="form-input" type="number" id="purgeAmt" value="10" min="1" max="100"></div>
+          <div style="background:rgba(255,0,60,0.05);border:1px solid rgba(255,0,60,0.2);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--c3);">
+            ⚠️ Видалені повідомлення не можна відновити!
+          </div>
+          <button class="form-btn danger" onclick="purgeChat()">🗑️ ВИДАЛИТИ ПОВІДОМЛЕННЯ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div class="sec" id="sec-settings">
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head">// ЗМІНИТИ НАЗВУ СЕРВЕРА</div>
+          <div class="panel-body">
+            <div class="form-row"><div class="form-label">НОВА НАЗВА</div><input class="form-input" id="newGuildName" placeholder="Назва сервера"></div>
+            <div class="form-row"><div class="form-label">ОПИС</div><textarea class="form-textarea" id="newGuildDesc" placeholder="Опис сервера..." style="min-height:60px"></textarea></div>
+            <button class="form-btn" onclick="saveSettings()">💾 ЗБЕРЕГТИ</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">// ПОТОЧНІ НАЛАШТУВАННЯ</div>
+          <div class="panel-body" id="settingsInfo"><div class="loading">ЗАВАНТАЖЕННЯ</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle">// ACTION</div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const GID = "{{ guild_id }}";
+let rolesMap = {}, channelsData = [], guildData = {};
+let memLoaded=false, bansLoaded=false, auditLoaded=false;
+let memCursor=null, memCursorStack=[], currentSearch='', showBots=false;
+let bansAll=[], searchTimer=null;
+
+// ── NAV ──
+const navTitles = {
+  overview:['// OVERVIEW','Загальна статистика'],
+  info:['// INFO','Деталі сервера'],
+  channels:['// CHANNELS','Управління каналами'],
+  roles:['// ROLES','Ролі сервера'],
+  members:['// MEMBERS','Список учасників'],
+  bans:['// BANS','Заблоковані'],
+  audit:['// AUDIT LOG','Журнал дій'],
+  message:['// MESSAGE','Надіслати повідомлення'],
+  purge:['// PURGE','Очистити чат'],
+  settings:['// SETTINGS','Налаштування'],
+};
+
+function nav(id, el) {
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const [t,s]=navTitles[id]||['//',''];
+  document.getElementById('tbTitle').textContent=t;
+  document.getElementById('tbSub').textContent=s;
+  if(id==='members' && !memLoaded) loadMembers();
+  if(id==='bans'    && !bansLoaded) loadBans();
+  if(id==='audit'   && !auditLoaded) loadAudit();
+}
+
+// ── HELPERS ──
+const $ = id => document.getElementById(id);
+const fmt = n => n?.toLocaleString('uk-UA') ?? '—';
+const hex = c => c ? '#'+c.toString(16).padStart(6,'0') : '#2a4a6a';
+const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('uk-UA') : '—';
+const initials = s => s.replace(/\s+/g,'').slice(0,2).toUpperCase() || '??';
+const avaHtml = (url,name,size=28) =>
+  `<div class="m-ava" style="width:${size}px;height:${size}px">
+    <img src="${url}" alt="${name[0]}" onerror="this.parentElement.textContent='${initials(name)}'">
+  </div>`;
+
+function toast(msg, ok=true) {
+  const el = document.createElement('div');
+  el.className = 'toast '+(ok?'ok':'err');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+
+async function api(url, opts={}) {
+  const res = await fetch(url, {headers:{'Content-Type':'application/json'}, ...opts});
+  const data = await res.json();
+  if(!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ── COPY ID ──
+function copyId(id, el) {
+  navigator.clipboard.writeText(id).then(()=>{
+    el.textContent = '✓ COPIED';
+    el.classList.add('copied');
+    setTimeout(()=>{ el.textContent = '⎘ '+id; el.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ── MODALS ──
+function openModal(title, html) {
+  $('modalTitle').textContent = title;
+  $('modalBody').innerHTML = html;
+  $('modal').classList.add('open');
+}
+function closeModal() { $('modal').classList.remove('open'); }
+$('modal').addEventListener('click', e => { if(e.target===$('modal')) closeModal(); });
+
+// ── LOAD GUILD ──
+async function loadGuild() {
+  try {
+    const g = await api(`/api/guild/${GID}`);
+    guildData = g;
+    const ico = $('sbIcon');
+    if(g.icon){ ico.innerHTML=`<img src="${g.icon}" alt="">`; }
+    else { ico.textContent = initials(g.name); }
+    $('sbName').textContent = g.name;
+    $('sbStat').textContent = `${fmt(g.member_count)} учасників`;
+    $('s-mem').textContent = fmt(g.member_count);
+    $('s-online').textContent = `${fmt(g.online_count)} онлайн`;
+    $('s-ch').textContent = fmt(g.channel_count);
+    $('s-roles').textContent = fmt(g.role_count);
+    $('s-boost').textContent = `Рівень ${g.boost_level}`;
+    $('s-bcnt').textContent = `${g.boost_count} бустів`;
+
+    // Info panel з Copy ID кнопками
+    $('infoPanel').innerHTML = [
+      ['🆔 ID', `<span class="copy-id" onclick="copyId('${g.id}',this)">⎘ ${g.id}</span>`],
+      ['🏷️ Назва', g.name],
+      ['👑 Власник ID', `<span class="copy-id" onclick="copyId('${g.owner_id}',this)">⎘ ${g.owner_id}</span>`],
+      ['👥 Учасники', fmt(g.member_count)],
+      ['🟢 Онлайн', fmt(g.online_count)],
+      ['💬 Канали', fmt(g.channel_count)],
+      ['🎭 Ролі', fmt(g.role_count)],
+      ['🚀 Буст рівень', `Рівень ${g.boost_level} (${g.boost_count} бустів)`],
+      ['🔒 Верифікація', ['Жодна','Низька','Середня','Висока','Найвища'][g.verification_level]||'—'],
+      ['📝 Опис', g.description||'—'],
+    ].map(([k,v])=>`<div class="info-row"><div class="info-key">${k}</div><div class="info-val">${v}</div></div>`).join('');
+
+    $('settingsInfo').innerHTML = [
+      ['Назва',g.name],['Опис',g.description||'—'],
+      ['Буст рівень',`Рівень ${g.boost_level}`],['Верифікація',g.verification_level],
+    ].map(([k,v])=>`<div class="info-row"><div class="info-key">${k}</div><div class="info-val">${v}</div></div>`).join('');
+
+    // Load extra stats for mini-stats row
+    loadStats();
+  } catch(e) { toast('Помилка гільдії: '+e.message, false); }
+}
+
+async function loadStats() {
+  try {
+    const s = await api(`/api/guild/${GID}/stats`);
+    $('ms-text').textContent = s.text_ch;
+    $('ms-voice').textContent = s.voice_ch;
+    $('ms-bans').textContent = s.bans;
+    $('miniStats').style.display = 'grid';
+    // Update sidebar counters
+    if(s.bans > 0){
+      const b = $('sbBanCnt');
+      b.textContent = s.bans;
+      b.style.display = 'inline';
+    }
+  } catch(e) {}
+}
+
+// ── CHANNELS ──
+async function loadChannels() {
+  try {
+    channelsData = await api(`/api/guild/${GID}/channels`);
+    const txt = channelsData.filter(c=>c.type===0||c.type===5);
+    $('chCount').textContent = `${txt.length} КАНАЛІВ`;
+    $('chList').innerHTML = txt.length ? txt.sort((a,b)=>a.position-b.position).map(c=>`
+      <div class="ch-item">
+        <div class="ch-hash">${c.type===5?'📢':'#'}</div>
+        <div>
+          <div class="ch-name">${c.name}</div>
+          ${c.nsfw?'<span style="font-size:9px;color:var(--c3)">NSFW</span>':''}
+        </div>
+        ${c.topic?`<div class="ch-topic">${c.topic}</div>`:''}
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <span class="copy-id" onclick="copyId('${c.id}',this)">⎘ ${c.id}</span>
+          <button class="act-btn del" onclick="deleteChannel('${c.id}','${c.name}')">✕</button>
+        </div>
+      </div>`).join('')
+      : '<div class="loading">КАНАЛІВ НЕ ЗНАЙДЕНО</div>';
+    const opts = txt.map(c=>`<option value="${c.id}"># ${c.name}</option>`).join('');
+    ['msgCh','embedCh','purgeCh'].forEach(id=>{ $(id).innerHTML='<option value="">— Виберіть канал —</option>'+opts; });
+  } catch(e) { toast('Помилка каналів: '+e.message, false); }
+}
+
+async function createChannel() {
+  const name = $('newChName').value.trim();
+  if(!name) return toast('Введіть назву!', false);
+  try {
+    await api(`/api/guild/${GID}/channels`, {method:'POST',body:JSON.stringify({
+      name, topic:$('newChTopic').value, type:parseInt($('newChType').value)
+    })});
+    toast('✅ Канал створено!');
+    $('newChName').value=''; $('newChTopic').value='';
+    loadChannels();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+async function deleteChannel(id, name) {
+  openModal('// ВИДАЛИТИ КАНАЛ', `
+    <p style="margin-bottom:20px;font-size:14px">Видалити <span style="color:var(--c1)">#${name}</span>?</p>
+    <div style="display:flex;gap:10px">
+      <button class="form-btn danger" onclick="confirmDeleteChannel('${id}')">✕ ВИДАЛИТИ</button>
+      <button class="form-btn" onclick="closeModal()">СКАСУВАТИ</button>
+    </div>`);
+}
+async function confirmDeleteChannel(id) {
+  try {
+    await api(`/api/guild/${GID}/channels/${id}`, {method:'DELETE'});
+    toast('✅ Канал видалено!'); closeModal(); loadChannels();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── ROLES ──
+function syncColor(el) {
+  $('newRoleColor').value = el.value.replace('#','');
+}
+function syncEmbedColor(el) {
+  $('embedColor').value = el.value.replace('#','');
+}
+
+async function loadRoles() {
+  try {
+    const roles = await api(`/api/guild/${GID}/roles`);
+    rolesMap = {};
+    roles.forEach(r=>rolesMap[r.id]=r);
+    $('roleCount').textContent = `${roles.length} РОЛЕЙ`;
+    $('rolesList').innerHTML = roles.sort((a,b)=>b.position-a.position).map(r=>{
+      const h = hex(r.color);
+      return `<div class="role-tag" style="border-color:${h}40;color:${h}">
+        <div class="role-dot" style="background:${h}"></div>
+        ${r.name}
+        ${r.managed?'<span style="font-size:9px;opacity:0.5">BOT</span>':''}
+        ${!r.managed?`<button class="role-del-btn" onclick="deleteRole('${r.id}','${r.name}',event)" title="Видалити">✕</button>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { toast('Помилка ролей: '+e.message, false); }
+}
+
+async function createRole() {
+  const name = $('newRoleName').value.trim();
+  if(!name) return toast('Введіть назву ролі!', false);
+  try {
+    await api(`/api/guild/${GID}/roles`, {method:'POST',body:JSON.stringify({
+      name, color:$('newRoleColor').value.replace('#','') || '5865f2',
+      mentionable: $('newRoleMention').checked
+    })});
+    toast('✅ Роль створено!'); $('newRoleName').value=''; loadRoles();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+async function deleteRole(rid, name, e) {
+  e.stopPropagation();
+  openModal('// ВИДАЛИТИ РОЛЬ', `
+    <p style="margin-bottom:20px;font-size:14px">Видалити роль <span style="color:var(--c1)">${name}</span>?</p>
+    <div style="display:flex;gap:10px">
+      <button class="form-btn danger" onclick="confirmDeleteRole('${rid}')">✕ ВИДАЛИТИ</button>
+      <button class="form-btn" onclick="closeModal()">СКАСУВАТИ</button>
+    </div>`);
+}
+async function confirmDeleteRole(rid) {
+  try {
+    await api(`/api/guild/${GID}/roles/${rid}`, {method:'DELETE'});
+    toast('✅ Роль видалено!'); closeModal(); loadRoles();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── MEMBERS ──
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{
+    currentSearch = $('memSearch').value.trim();
+    memCursor = null; memCursorStack = [];
+    loadMembers();
+  }, 400);
+}
+
+function clearSearch() {
+  $('memSearch').value = '';
+  currentSearch = '';
+  memCursor = null; memCursorStack = [];
+  loadMembers();
+}
+
+function toggleBots() {
+  showBots = !showBots;
+  $('showBotsBtn').style.opacity = showBots ? '1' : '0.5';
+  loadMembers();
+}
+
+async function loadMembers(after=null) {
+  memLoaded = true;
+  $('memTable').innerHTML = '<tr><td colspan="4" class="loading">ЗАВАНТАЖЕННЯ</td></tr>';
+  try {
+    let url = `/api/guild/${GID}/members?limit=50`;
+    if(currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+    else if(after) url += `&after=${after}`;
+
+    const data = await api(url);
+    const members = data.members || data; // backwards compat
+
+    // Update sidebar counter
+    const sbCnt = $('sbMemCnt');
+    sbCnt.textContent = data.count || members.length;
+    sbCnt.style.display = 'inline';
+
+    $('memCount').textContent = `${members.length} ВІДОБРАЖАЄТЬСЯ`;
+    $('memTable').innerHTML = members.map(m=>{
+      const roles = m.roles.slice(0,3).map(rid=>{
+        const r = rolesMap[rid]; if(!r) return '';
+        const h = hex(r.color);
+        return `<span class="rpill" style="color:${h};border-color:${h}40;background:${h}10">${r.name}</span>`;
+      }).join('');
+      return `<tr>
+        <td><div class="member-cell">${avaHtml(m.avatar,m.username)}
+          <div>
+            <div class="m-name">${m.username}</div>
+            ${m.nick?`<div class="m-nick">${m.nick}</div>`:''}
+          </div>
+        </div></td>
+        <td>${roles || '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+        <td><span style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--muted)">${fmtDate(m.joined_at)}</span></td>
+        <td>
+          <button class="act-btn role" onclick="openRoleManager('${m.id}','${m.username.replace(/'/g,"\\'")}')">РОЛІ</button>
+          <button class="act-btn nick" onclick="openNick('${m.id}','${m.username.replace(/'/g,"\\'")}')">NICK</button>
+          <button class="act-btn kick" onclick="openKick('${m.id}','${m.username.replace(/'/g,"\\'")}')">KICK</button>
+          <button class="act-btn ban" onclick="openBan('${m.id}','${m.username.replace(/'/g,"\\'")}')">BAN</button>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" class="loading">УЧАСНИКІВ НЕ ЗНАЙДЕНО</td></tr>';
+
+    // Pagination
+    const pag = $('memPagination');
+    const nextCursor = data.next_cursor;
+    if(!currentSearch){
+      pag.style.display = 'flex';
+      $('pagInfo').textContent = `Показано ${members.length} учасників`;
+      $('prevBtn').disabled = memCursorStack.length === 0;
+      $('nextBtn').disabled = !nextCursor;
+      memCursor = nextCursor;
+    } else {
+      pag.style.display = 'none';
+    }
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+function pagNext() {
+  if(!memCursor) return;
+  memCursorStack.push(memCursor);
+  loadMembers(memCursor);
+}
+function pagPrev() {
+  memCursorStack.pop();
+  const prev = memCursorStack[memCursorStack.length-1] || null;
+  memCursorStack = memCursorStack.slice(0,-1); // будемо пушити знову в loadMembers
+  if(memCursorStack.length > 0) {
+    const cur = memCursorStack[memCursorStack.length-1];
+    loadMembers(cur);
+  } else {
+    memCursorStack = [];
+    loadMembers(null);
+  }
+}
+
+// ── ROLE MANAGER ──
+async function openRoleManager(uid, username) {
+  openModal(`// РОЛІ: ${username}`, '<div class="loading">ЗАВАНТАЖЕННЯ</div>');
+  try {
+    const member = await api(`/api/guild/${GID}/members/${uid}`);
+    const memberRoleIds = new Set(member.roles);
+    const allRoles = Object.values(rolesMap).filter(r=>!r.managed).sort((a,b)=>b.position-a.position);
+    const html = `
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Клікни на роль щоб додати/прибрати</p>
+      <div class="role-picker">
+        ${allRoles.map(r=>{
+          const h = hex(r.color);
+          const has = memberRoleIds.has(r.id);
+          return `<div class="rp-item ${has?'has-role':''}" 
+            style="border-color:${h}60;color:${h};background:${h}10"
+            onclick="toggleRole('${uid}','${r.id}',this)">
+            <div style="width:8px;height:8px;background:${h}"></div>
+            ${r.name}
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:16px">
+        <button class="form-btn" onclick="closeModal()">✅ ГОТОВО</button>
+      </div>`;
+    $('modalBody').innerHTML = html;
+  } catch(e) { $('modalBody').innerHTML = `<p style="color:var(--c3)">${e.message}</p>`; }
+}
+
+async function toggleRole(uid, rid, el) {
+  const has = el.classList.contains('has-role');
+  try {
+    if(has){
+      await api(`/api/guild/${GID}/members/${uid}/roles/${rid}`, {method:'DELETE'});
+      el.classList.remove('has-role');
+      toast('✅ Роль прибрано!');
+    } else {
+      await api(`/api/guild/${GID}/members/${uid}/roles/${rid}`, {method:'PUT'});
+      el.classList.add('has-role');
+      toast('✅ Роль додано!');
+    }
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+function openKick(uid, name) {
+  openModal('// KICK УЧАСНИКА', `
+    <p style="margin-bottom:16px;font-size:14px">Кікнути <span style="color:var(--c1)">${name}</span>?</p>
+    <div class="form-row"><div class="form-label">ПРИЧИНА</div><input class="form-input" id="modReason" placeholder="Причина..."></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="form-btn danger" onclick="doKick('${uid}')">👢 KICK</button>
+      <button class="form-btn" onclick="closeModal()">СКАСУВАТИ</button>
+    </div>`);
+}
+async function doKick(uid) {
+  try {
+    await api(`/api/guild/${GID}/members/${uid}/kick`,{method:'POST',body:JSON.stringify({reason:$('modReason')?.value||'Dashboard kick'})});
+    toast('✅ Учасника кікнуто!'); closeModal(); memLoaded=false; loadMembers();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+function openBan(uid, name) {
+  openModal('// BAN УЧАСНИКА', `
+    <p style="margin-bottom:16px;font-size:14px">Забанити <span style="color:var(--c3)">${name}</span>?</p>
+    <div class="form-row"><div class="form-label">ПРИЧИНА</div><input class="form-input" id="modReason" placeholder="Причина..."></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="form-btn danger" onclick="doBan('${uid}')">🔨 BAN</button>
+      <button class="form-btn" onclick="closeModal()">СКАСУВАТИ</button>
+    </div>`);
+}
+async function doBan(uid) {
+  try {
+    await api(`/api/guild/${GID}/members/${uid}/ban`,{method:'POST',body:JSON.stringify({reason:$('modReason')?.value||'Dashboard ban'})});
+    toast('✅ Учасника забанено!'); closeModal(); memLoaded=false; loadMembers();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+function openNick(uid, name) {
+  openModal('// ЗМІНИТИ НІКНЕЙМ', `
+    <p style="margin-bottom:16px;font-size:14px">Нікнейм для <span style="color:var(--c1)">${name}</span></p>
+    <div class="form-row"><div class="form-label">НІКНЕЙМ (порожньо = прибрати)</div><input class="form-input" id="newNick" placeholder="Новий нікнейм..."></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="form-btn" onclick="doNick('${uid}')">✅ ЗБЕРЕГТИ</button>
+      <button class="form-btn" onclick="closeModal()">СКАСУВАТИ</button>
+    </div>`);
+}
+async function doNick(uid) {
+  try {
+    await api(`/api/guild/${GID}/members/${uid}/nickname`,{method:'PATCH',body:JSON.stringify({nick:$('newNick')?.value||''})});
+    toast('✅ Нікнейм змінено!'); closeModal();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── BANS ──
+async function loadBans() {
+  bansLoaded = true;
+  try {
+    bansAll = await api(`/api/guild/${GID}/bans`);
+    renderBans(bansAll);
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+function renderBans(bans) {
+  $('banCount').textContent = `${bans.length} БАНІВ`;
+  // Update sidebar
+  const sb = $('sbBanCnt');
+  if(bans.length > 0){ sb.textContent = bans.length; sb.style.display='inline'; }
+  $('banList').innerHTML = bans.length ? bans.map(b=>`
+    <div class="ban-item">
+      ${avaHtml(b.avatar, b.username, 30)}
+      <div>
+        <div class="ban-user">${b.username}</div>
+        <div class="ban-reason">${b.reason}</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <span class="copy-id" onclick="copyId('${b.user_id}',this)">⎘ ID</span>
+        <button class="act-btn unban" onclick="doUnban('${b.user_id}','${b.username}')">↩ РОЗБАН</button>
+      </div>
+    </div>`).join('')
+    : '<div class="loading">✅ СПИСОК БАНІВ ПОРОЖНІЙ</div>';
+}
+
+function filterBans() {
+  const q = $('banSearch').value.toLowerCase();
+  renderBans(bansAll.filter(b=>b.username.toLowerCase().includes(q)));
+}
+
+async function doUnban(uid, name) {
+  if(!confirm(`Розбанити ${name}?`)) return;
+  try {
+    await api(`/api/guild/${GID}/bans/${uid}`, {method:'DELETE'});
+    toast('✅ Розбанено!'); bansLoaded=false; loadBans();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── AUDIT ──
+let auditFilter = null;
+async function loadAudit(preview=false) {
+  if(!preview) auditLoaded=true;
+  try {
+    let url = `/api/guild/${GID}/audit?limit=${preview?5:50}`;
+    if(!preview && auditFilter) url += `&action_type=${auditFilter}`;
+    const entries = await api(url);
+    const icons = {1:'⚙️',2:'💬',3:'✏️',4:'🗑️',12:'🔗',13:'❌',20:'👢',22:'🔨',23:'🔓',24:'✏️',25:'🎭',26:'➕',27:'🗑️',28:'➖'};
+    const colors = {20:'var(--orange)',22:'var(--c3)',23:'var(--green)',1:'var(--c1)'};
+    const html = entries.map(e=>`
+      <div class="audit-item">
+        <div class="audit-icon">${icons[e.action_type]||'📝'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="audit-action" style="color:${colors[e.action_type]||'var(--text)'}">${e.action}</div>
+          <div class="audit-user">// ${e.user}</div>
+          <div class="audit-reason">${e.reason}</div>
+        </div>
+        ${e.target_id?`<span class="copy-id" style="align-self:flex-start;margin-top:2px" onclick="copyId('${e.target_id}',this)">⎘ TARGET</span>`:''}
+      </div>`).join('') || '<div class="loading">ЗАПИСІВ НЕ ЗНАЙДЕНО</div>';
+    if(preview) { $('overviewAudit').innerHTML = html; }
+    else { $('auditList').innerHTML = html; }
+  } catch(e) {
+    const el = preview ? 'overviewAudit' : 'auditList';
+    $(el).innerHTML = '<div class="loading">АУДИТ НЕДОСТУПНИЙ</div>';
+  }
+}
+
+function setAuditFilter(type, btn) {
+  auditFilter = type;
+  document.querySelectorAll('.af-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  auditLoaded = false;
+  loadAudit();
+}
+
+// ── SEND MESSAGE ──
+$('msgText').addEventListener('input', function(){
+  $('msgLen').textContent = `${this.value.length}/2000`;
+  if(this.value.length > 2000) $('msgLen').style.color = 'var(--c3)';
+  else $('msgLen').style.color = 'var(--muted)';
+});
+
+async function sendMsg(isEmbed) {
+  const ch = isEmbed ? $('embedCh').value : $('msgCh').value;
+  if(!ch) return toast('Виберіть канал!', false);
+  try {
+    const body = isEmbed ? {
+      channel_id: ch,
+      embed_title: $('embedTitle').value,
+      embed_desc: $('embedDesc').value,
+      embed_color: $('embedColor').value || '00d4ff',
+      embed_footer: $('embedFooter').value,
+    } : {
+      channel_id: ch,
+      content: $('msgText').value.trim(),
+    };
+    await api(`/api/guild/${GID}/send_message`, {method:'POST',body:JSON.stringify(body)});
+    toast('✅ Повідомлення надіслано!');
+    if(isEmbed){ $('embedTitle').value=''; $('embedDesc').value=''; $('embedFooter').value=''; }
+    else { $('msgText').value=''; $('msgLen').textContent='0/2000'; }
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── PURGE ──
+async function purgeChat() {
+  const ch = $('purgeCh').value;
+  const amt = parseInt($('purgeAmt').value)||10;
+  if(!ch) return toast('Виберіть канал!', false);
+  if(!confirm(`Видалити ${amt} повідомлень?`)) return;
+  try {
+    const r = await api(`/api/guild/${GID}/purge`,{method:'POST',body:JSON.stringify({channel_id:ch,amount:amt})});
+    toast(`✅ Видалено ${r.deleted} повідомлень!`);
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── SETTINGS ──
+async function saveSettings() {
+  const name = $('newGuildName').value.trim();
+  const desc = $('newGuildDesc').value;
+  if(!name && !desc) return toast('Нічого не змінено!', false);
+  try {
+    const r = await api(`/api/guild/${GID}/settings`,{method:'PATCH',body:JSON.stringify({name,description:desc})});
+    toast('✅ Збережено! Нова назва: '+r.name);
+    loadGuild();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── REFRESH ──
+function refreshAll() {
+  memLoaded=false; bansLoaded=false; auditLoaded=false;
+  loadGuild(); loadChannels(); loadRoles(); loadAudit(true);
+  toast('↻ Дані оновлено!');
+}
+
+// ── INIT ──
+loadGuild();
+loadChannels();
+loadRoles();
+loadAudit(true);
+</script>
+</body>
+</html>
