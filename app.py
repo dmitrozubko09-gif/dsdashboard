@@ -586,5 +586,5 @@ def api_guild_settings(gid):
 
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
-    print("🚀 http://localhost:5000")
-    app.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    print("🚀 http://localhost:8080")
+    app.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
